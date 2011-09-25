@@ -9,6 +9,6 @@ class Api::ProductsController < Api::BaseController
     end
 
     def object_serialization_options
-      { :include => [:master, :variants, :taxons] }
+      { :include => [:master, :variants, :taxons, :images] }
     end
 end
