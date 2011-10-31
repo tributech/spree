@@ -11,6 +11,14 @@ module Spree
       [File.expand_path('../templates', __FILE__)]
     end
 
+    def config_spree_yml
+      create_file "config/spree.yml" do
+        settings = { 'version' => Spree.version }
+
+        settings.to_yaml
+      end
+    end
+
     def remove_unneeded_files
       remove_file "public/index.html"
     end
@@ -48,14 +56,24 @@ Disallow: /users
       template "app/assets/stylesheets/admin/all.css"
     end
 
+    def create_overrides_directory
+      empty_directory "app/overrides"
+    end
+
     def configure_application
       application <<-APP
   config.middleware.use "SeoAssist"
     config.middleware.use "RedirectLegacyProductUrl"
 
     config.to_prepare do
+      #loads application's model / class decorators
       Dir.glob(File.join(File.dirname(__FILE__), "../app/**/*_decorator*.rb")) do |c|
         Rails.configuration.cache_classes ? require(c) : load(c)
+      end
+
+      #loads application's deface view overrides
+      Dir.glob(File.join(File.dirname(__FILE__), "../app/overrides/*.rb")) do |c|
+        Rails.application.config.cache_classes ? require(c) : load(c)
       end
     end
       APP
